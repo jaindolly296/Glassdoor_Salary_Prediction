@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 5450)
-Total output lines: 1214
-
 # -*- coding: utf-8 -*-
 """GlassDoor_salary
 
@@ -576,7 +573,149 @@ df.head()
 
 df["avg_salary"].head()
 
-…450 tokens truncated…"
+#FEATURE SELECTION
+
+#Select important columns.
+features = [
+
+    "Job Title",
+
+    "Location",
+
+    "Size",
+
+    "Industry",
+
+    "Sector",
+
+    "Rating"
+]
+
+#CREATE X AND y
+X = df[features]
+
+y = df["avg_salary"]
+
+#CHECK FEATURE DATA
+X.head()
+
+from sklearn.preprocessing import LabelEncoder
+
+encoders = {}
+
+for col in X.columns:
+
+    le = LabelEncoder()
+
+    X[col] = le.fit_transform(
+        X[col].astype(str)
+    )
+
+    encoders[col] = le
+
+X.head()
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+
+    X,
+    y,
+
+    test_size=0.2,
+
+    random_state=42
+)
+
+print(X_train.shape)
+
+print(X_test.shape)
+
+from sklearn.linear_model import LinearRegression
+
+lr = LinearRegression()
+
+lr.fit(
+    X_train,
+    y_train
+)
+
+pred_lr = lr.predict(X_test)
+
+from sklearn.ensemble import RandomForestRegressor
+
+rf = RandomForestRegressor(
+    n_estimators=100,
+    random_state=42
+)
+
+rf.fit(
+    X_train,
+    y_train
+)
+
+pred_rf = rf.predict(X_test)
+
+from sklearn.metrics import (
+
+    mean_absolute_error,
+
+    mean_squared_error,
+
+    r2_score
+)
+
+mae = mean_absolute_error(
+    y_test,
+    pred_rf
+)
+
+print("MAE:", mae)
+
+rmse = np.sqrt(
+
+    mean_squared_error(
+        y_test,
+        pred_rf
+    )
+)
+
+print("RMSE:", rmse)
+
+r2 = r2_score(
+    y_test,
+    pred_rf
+)
+
+print("R2 Score:", r2)
+
+importance = rf.feature_importances_
+
+feature_df = pd.DataFrame({
+
+    "Feature": X.columns,
+
+    "Importance": importance
+})
+
+feature_df = feature_df.sort_values(
+
+    by="Importance",
+
+    ascending=False
+)
+
+feature_df
+
+plt.figure(figsize=(10,5))
+
+sns.barplot(
+
+    data=feature_df,
+
+    x="Importance",
+
+    y="Feature"
 )
 
 plt.title(
